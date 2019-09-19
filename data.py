@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 # importing dataframe from a csv in my GitHub
-gen0 = pd.read_csv('https://raw.githubusercontent.com/SeanAntosiak/US-Energy-Generation/master/datasets/annual_generation_state.csv',  # noqa
+gen0 = pd.read_csv('https://raw.githubusercontent.com/SeanAntosiak/US-Energy-Generation/master/generationData.csv',  # noqa
                     skiprows=1, thousands=',')
 
 # takes only the rows corosponding to state total generation
