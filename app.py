@@ -3,7 +3,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 import plotly.graph_objects as go
 from dash.dependencies import Input, Output
-from GenerationData import *
+from data import *
 
 app = dash.Dash()
 
@@ -67,6 +67,17 @@ def createMap(sourceDropdown, yearSlider):
                  'Solar Thermal and Photovoltaic': 'solar'
                  }
 
+    # creates a dictionary for the scale max of each source
+    scaleDict = {'Total': 300000000,
+                 'Coal': 100000000,
+                 'Natural Gas': 150000000,
+                 'Petroleum': 1000000,
+                 'Nuclear': 50000000,
+                 'Wind': 50000000,
+                 'Hydroelectric Conventional': 50000000,
+                 'Solar Thermal and Photovoltaic': 25000000
+                 }
+
     # creates choropleth map from dataframe
     fig = go.Figure(
               data=go.Choropleth(
@@ -74,7 +85,9 @@ def createMap(sourceDropdown, yearSlider):
                   locationmode='USA-states',
                   z=genX['Mwh'],
                   colorscale=colorDict[sourceDropdown],
-                  colorbar_title='Mwh'
+                  colorbar_title='Mwh',
+                  zmin=0,
+                  zmax=scaleDict[sourceDropdown]
               ))
 
     # update map with title and limits scope to only include US
