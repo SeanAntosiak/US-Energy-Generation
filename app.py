@@ -2,8 +2,10 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import plotly.graph_objects as go
+import plotly.express as px
 from dash.dependencies import Input, Output
 from data import *
+
 
 app = dash.Dash()
 
@@ -37,7 +39,26 @@ app.layout = html.Div(children=[
                marks={1990: '1990', 1995: '1995', 2000: '2000',
                       2005: '2005', 2010: '2010', 2017: '2017'},
                value=1990
-               )
+               ),
+
+    dcc.Graph(id='line'),
+
+    dcc.Checklist(
+        id='sourceChecklist',
+        options=[
+            {'label': 'Total', 'value': 'Total'},
+            {'label': 'Coal', 'value': 'Coal'},
+            {'label': 'Natural Gas', 'value': 'Natural Gas'},
+            {'label': 'Petrolium', 'value': 'Petroleum'},
+            {'label': 'Nuclear Power', 'value': 'Nuclear'},
+            {'label': 'Hydroelectric Power',
+             'value': 'Hydroelectric Conventional'},
+            {'label': 'Wind', 'value': 'Wind'},
+            {'label': 'Solar', 'value': 'Solar Thermal and Photovoltaic'},
+        ],
+        value=['Total']
+    ),
+
 ])
 
 
@@ -79,24 +100,38 @@ def createMap(sourceDropdown, yearSlider):
                  }
 
     # creates choropleth map from dataframe
-    fig = go.Figure(
-              data=go.Choropleth(
-                  locations=genX['STATE'],
-                  locationmode='USA-states',
-                  z=genX['Mwh'],
-                  colorscale=colorDict[sourceDropdown],
-                  colorbar_title='Mwh',
-                  zmin=0,
-                  zmax=scaleDict[sourceDropdown]
-              ))
+    fig_map = go.Figure(data=go.Choropleth(
+                        locations=genX['STATE'],
+                        locationmode='USA-states',
+                        z=genX['Mwh'],
+                        colorscale=colorDict[sourceDropdown],
+                        colorbar_title='Mwh',
+                        zmin=0,
+                        zmax=scaleDict[sourceDropdown]
+                        ))
 
     # update map with title and limits scope to only include US
-    fig.update_layout(
+    fig_map.update_layout(
         title_text='State Energy Generation by selected Source and Year',
         geo_scope='usa'
     )
 
-    return(fig)
+    return(fig_map)
+
+
+@app.callback(
+    Output('line', 'figure'),
+    [Input('sourceDropdown', 'value')])
+def createLine(sourceDropdown):
+
+    # creates first line with given source and state
+    fig_line = px.line(
+        gen[(gen['SOURCE'] == 'Total') & (gen['STATE'] == 'US')],
+        x='YEAR',
+        y='Mwh'
+    )
+
+    return(fig_line)
 
 
 if __name__ == '__main__':
