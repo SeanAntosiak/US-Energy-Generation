@@ -24,9 +24,21 @@ gen.rename(columns={'ENERGY SOURCE': 'SOURCE',
 # converts Megawatthours coulumn to Intiger
 gen['Mwh'] = gen['Mwh'].apply(int)
 
+sourceList = ['Coal', 'Natural Gas', 'Petroleum']
 
 us = gen[gen['STATE'] == 'US']
-us_tot = us[us['SOURCE'] == 'Total']
-fig_line = px.line(us_tot, x='YEAR', y='Mwh')
+
+fig_line = px.line(usdf, x='YEAR', y='Mwh', color='SOURCE')
 
 fig_line.show()
+
+
+
+    us = gen.copy()
+
+    usdf = pd.DataFrame()
+    for source in sourceChecklist:
+        sourceDF = us[us['SOURCE'] == source]
+        usdf = pd.concat([usdf, sourceDF])
+
+    fig_line = px.line(usdf, x='YEAR', y='Mwh', color='SOURCE')

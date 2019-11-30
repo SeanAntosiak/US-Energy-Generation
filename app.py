@@ -6,60 +6,91 @@ import plotly.express as px
 from dash.dependencies import Input, Output
 from data import *
 
+# creates div for the choropleth map
+map_div = html.Div(
+    children=[
 
+        # takes map from appcallback
+        dcc.Graph(id='map'),
+
+        # creaes year slider
+        html.Div(
+            dcc.Slider(id='yearSlider',
+                       min=1990,
+                       max=2017,
+                       step=1,
+                       dots=True,
+                       marks={1990: '1990', 1995: '1995', 2000: '2000',
+                              2005: '2005', 2010: '2010', 2017: '2017'},
+                       value=1990
+                       ),
+            # adds padding so slider and dropdown dont overlap
+            style={'paddingBottom': '30px'}
+        ),
+
+        # creates dropdown for selecting source
+        dcc.Dropdown(
+            id='sourceDropdown',
+            options=[
+               {'label': 'Total', 'value': 'Total'},
+               {'label': 'Coal', 'value': 'Coal'},
+               {'label': 'Natural Gas', 'value': 'Natural Gas'},
+               {'label': 'Petrolium', 'value': 'Petroleum'},
+               {'label': 'Nuclear Power', 'value': 'Nuclear'},
+               {'label': 'Hydroelectric Power',
+                'value': 'Hydroelectric Conventional'},
+               {'label': 'Wind', 'value': 'Wind'},
+               {'label': 'Solar', 'value': 'Solar Thermal and Photovoltaic'},
+            ],
+            value='Total'
+            ),
+        ],
+    # sets style to put map on left with padding
+    style={'paddingLeft': '2%',
+           'width': '40%',
+           'float': 'left'}
+)
+
+
+# creates div for line graph
+line_div = html.Div(
+    children=[
+
+        # takes line graph form appcallback
+        dcc.Graph(id='line'),
+
+        # creates checklist for sources
+        dcc.Checklist(
+            id='sourceChecklist',
+            options=[
+                {'label': 'Total', 'value': 'Total'},
+                {'label': 'Coal', 'value': 'Coal'},
+                {'label': 'Natural Gas', 'value': 'Natural Gas'},
+                {'label': 'Petrolium', 'value': 'Petroleum'},
+                {'label': 'Nuclear Power', 'value': 'Nuclear'},
+                {'label': 'Hydroelectric Power',
+                 'value': 'Hydroelectric Conventional'},
+                {'label': 'Wind', 'value': 'Wind'},
+                {'label': 'Solar',
+                 'value': 'Solar Thermal and Photovoltaic'},
+            ],
+            value=['Total'],
+            labelStyle={'display': 'inline-block',
+                        'margin-left': '1em'}
+        ),
+    ],
+
+    # sets style to put line graph on right with padding
+    style={'paddingRight': '2%',
+           'width': '50%',
+           'float': 'right'}
+)
+
+
+# creates instance of dash app
 app = dash.Dash()
 
-
-app.layout = html.Div(children=[
-    html.H1('United States Energy Generation'),
-
-    dcc.Dropdown(
-        id='sourceDropdown',
-        options=[
-            {'label': 'Total', 'value': 'Total'},
-            {'label': 'Coal', 'value': 'Coal'},
-            {'label': 'Natural Gas', 'value': 'Natural Gas'},
-            {'label': 'Petrolium', 'value': 'Petroleum'},
-            {'label': 'Nuclear Power', 'value': 'Nuclear'},
-            {'label': 'Hydroelectric Power',
-             'value': 'Hydroelectric Conventional'},
-            {'label': 'Wind', 'value': 'Wind'},
-            {'label': 'Solar', 'value': 'Solar Thermal and Photovoltaic'},
-        ],
-        value='Total'
-    ),
-
-    dcc.Graph(id='map'),
-
-    dcc.Slider(id='yearSlider',
-               min=1990,
-               max=2017,
-               step=1,
-               dots=True,
-               marks={1990: '1990', 1995: '1995', 2000: '2000',
-                      2005: '2005', 2010: '2010', 2017: '2017'},
-               value=1990
-               ),
-
-    dcc.Graph(id='line'),
-
-    dcc.Checklist(
-        id='sourceChecklist',
-        options=[
-            {'label': 'Total', 'value': 'Total'},
-            {'label': 'Coal', 'value': 'Coal'},
-            {'label': 'Natural Gas', 'value': 'Natural Gas'},
-            {'label': 'Petrolium', 'value': 'Petroleum'},
-            {'label': 'Nuclear Power', 'value': 'Nuclear'},
-            {'label': 'Hydroelectric Power',
-             'value': 'Hydroelectric Conventional'},
-            {'label': 'Wind', 'value': 'Wind'},
-            {'label': 'Solar', 'value': 'Solar Thermal and Photovoltaic'},
-        ],
-        value=['Total']
-    ),
-
-])
+app.layout = html.Div([map_div, line_div])
 
 
 @app.callback(
@@ -121,15 +152,18 @@ def createMap(sourceDropdown, yearSlider):
 
 @app.callback(
     Output('line', 'figure'),
-    [Input('sourceDropdown', 'value')])
-def createLine(sourceDropdown):
+    [Input('sourceChecklist', 'value')])
+def createLine(sourceChecklist):
 
-    # creates first line with given source and state
-    fig_line = px.line(
-        gen[(gen['SOURCE'] == 'Total') & (gen['STATE'] == 'US')],
-        x='YEAR',
-        y='Mwh'
-    )
+    # creates new df that just includes totals for all US states combined
+    us = gen[gen['STATE'] == 'US'].copy()
+
+    usdf = pd.DataFrame()
+    for source in sourceChecklist:
+        sourceDF = us[us['SOURCE'] == source]
+        usdf = pd.concat([usdf, sourceDF])
+
+    fig_line = px.line(usdf, x='YEAR', y='Mwh', color='SOURCE')
 
     return(fig_line)
 
