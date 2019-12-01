@@ -90,6 +90,7 @@ line_div = html.Div(
 # creates instance of dash app
 app = dash.Dash()
 
+# sets the layout for the app
 app.layout = html.Div([map_div, line_div])
 
 

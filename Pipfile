@@ -13,6 +13,7 @@ dash-daq = "*"
 plotly = "*"
 chart-studio = "*"
 dash-bootstrap-components = "*"
+seaborn = "*"
 
 [requires]
 python_version = "3.7"
