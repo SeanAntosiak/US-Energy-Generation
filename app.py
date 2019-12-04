@@ -86,7 +86,6 @@ line_div = html.Div(
            'float': 'right'}
 )
 
-
 # creates instance of dash app
 app = dash.Dash()
 
@@ -142,11 +141,8 @@ def createMap(sourceDropdown, yearSlider):
                         zmax=scaleDict[sourceDropdown]
                         ))
 
-    # update map with title and limits scope to only include US
-    fig_map.update_layout(
-        title_text='State Energy Generation by selected Source and Year',
-        geo_scope='usa'
-    )
+    # update map to limit the scope to only include US
+    fig_map.update_layout(geo_scope='usa')
 
     return(fig_map)
 
@@ -159,12 +155,32 @@ def createLine(sourceChecklist):
     # creates new df that just includes totals for all US states combined
     us = gen[gen['STATE'] == 'US'].copy()
 
-    usdf = pd.DataFrame()
-    for source in sourceChecklist:
-        sourceDF = us[us['SOURCE'] == source]
-        usdf = pd.concat([usdf, sourceDF])
+    # creates a blank plotly figure and sets axis titles
+    fig_line = go.Figure()
+    fig_line.update_layout(xaxis_title='Year',
+                           yaxis_title='Megawatt hours')
 
-    fig_line = px.line(usdf, x='YEAR', y='Mwh', color='SOURCE')
+    # creates a dictionary to change line color based on source
+    colorDict = {'Total': 'magenta',
+                 'Coal': 'black',
+                 'Natural Gas': 'blue',
+                 'Petroleum': 'brown',
+                 'Nuclear': 'green',
+                 'Wind': 'grey',
+                 'Hydroelectric Conventional': 'cyan',
+                 'Solar Thermal and Photovoltaic': 'orange'
+                 }
+
+    # creates a trace for each source checked in the checklist
+    for source in sourceChecklist:
+        source_df = us[us['SOURCE'] == source]
+        fig_line.add_trace(go.Scatter(
+            x=source_df['YEAR'],
+            y=source_df['Mwh'],
+            mode='lines+markers',
+            name=f'{source}',
+            marker_color=f'{colorDict[source]}'
+        ))
 
     return(fig_line)
 
