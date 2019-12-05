@@ -46,15 +46,17 @@ map_div = html.Div(
             ),
         ],
     # sets style to put map on left with padding
-    style={'paddingLeft': '2%',
-           'width': '40%',
-           'float': 'left'}
+    style={'float': 'left',
+           'width': '45vw',
+           'height': '45vw',
+           'paddingLeft': '1vw'}
 )
 
 
 # creates div for line graph
 line_div = html.Div(
     children=[
+
 
         # takes line graph form appcallback
         dcc.Graph(id='line'),
@@ -81,16 +83,27 @@ line_div = html.Div(
     ],
 
     # sets style to put line graph on right with padding
-    style={'paddingRight': '2%',
-           'width': '50%',
-           'float': 'right'}
+    style={'float': 'right',
+           'width': '45vw',
+           'height': '45vw',
+           'paddingRight': '1vw'}
+)
+
+# creates div for text descring project
+text_div = html.Div(
+    children=[html.H1(['Us Energy Generation']),
+              html.H2(['A data visualization project by Sean Antosiak']),
+              html.H3(['Data from the Energy Information Administration']),
+              html.Div([''''''])  # maybe I will add further description later
+              ],
+    style={'float': 'top'}
 )
 
 # creates instance of dash app
 app = dash.Dash()
 
 # sets the layout for the app
-app.layout = html.Div([map_div, line_div])
+app.layout = html.Div([text_div, map_div, line_div])
 
 
 @app.callback(
@@ -142,7 +155,8 @@ def createMap(sourceDropdown, yearSlider):
                         ))
 
     # update map to limit the scope to only include US
-    fig_map.update_layout(geo_scope='usa')
+    fig_map.update_layout(title='Us Energy Generation By State',
+                          geo_scope='usa')
 
     return(fig_map)
 
@@ -157,7 +171,8 @@ def createLine(sourceChecklist):
 
     # creates a blank plotly figure and sets axis titles
     fig_line = go.Figure()
-    fig_line.update_layout(xaxis_title='Year',
+    fig_line.update_layout(title='Energy Produced By Year (US Total)',
+                           xaxis_title='Year',
                            yaxis_title='Megawatt hours')
 
     # creates a dictionary to change line color based on source
