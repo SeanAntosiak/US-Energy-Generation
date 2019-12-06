@@ -91,7 +91,7 @@ line_div = html.Div(
 
 # creates div for text descring project
 text_div = html.Div(
-    children=[html.H1(['Us Energy Generation']),
+    children=[html.H1(['US Energy Generation']),
               html.H2(['A data visualization project by Sean Antosiak']),
               html.H3(['Data from the Energy Information Administration']),
               html.Div([''''''])  # maybe I will add further description later
@@ -101,6 +101,9 @@ text_div = html.Div(
 
 # creates instance of dash app
 app = dash.Dash()
+
+# creates server
+server = app.server
 
 # sets the layout for the app
 app.layout = html.Div([text_div, map_div, line_div])
@@ -155,7 +158,7 @@ def createMap(sourceDropdown, yearSlider):
                         ))
 
     # update map to limit the scope to only include US
-    fig_map.update_layout(title='Us Energy Generation By State',
+    fig_map.update_layout(title='US Energy Generation By State',
                           geo_scope='usa')
 
     return(fig_map)
