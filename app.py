@@ -94,7 +94,9 @@ text_div = html.Div(
     children=[html.H1(['US Energy Generation']),
               html.H2(['A data visualization project by Sean Antosiak']),
               html.H3(['Data from the Energy Information Administration']),
-              html.Div([''''''])  # maybe I will add further description later
+              dcc.Link([
+                'Project repository on GitHub'],
+                href='https://github.com/SeanAntosiak/US-Energy-Generation')
               ],
     style={'float': 'top'}
 )
@@ -104,6 +106,9 @@ app = dash.Dash()
 
 # creates server
 server = app.server
+
+# sets tab title
+app.title = 'US Energy'
 
 # sets the layout for the app
 app.layout = html.Div([text_div, map_div, line_div])
